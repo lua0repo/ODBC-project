@@ -1,0 +1,100 @@
+Database Connection Manager that utilizes ODBC (Open Database Connectivity) drivers can be a useful tool for developers and database administrators. Below is a simple implementation in Python using the pyodbc library, which allows you to connect to various databases through ODBC.
+
+Prerequisites
+1. Python: Make sure you have Python installed on your machine.
+
+2. pyodbc: Install the pyodbc library using pip:
+
+"""""""""""""""""""""""""""""""""""""""""""""""
+
+pip install pyodbc
+
+"""""""""""""""""""""""""""""""""""""""""""""""
+
+3. ODBC Drivers: Ensure that you have the necessary ODBC drivers installed for the databases you want to connect to (e.g., SQL Server, MySQL, PostgreSQL, etc.).
+
+Simple Database Connection Manager
+Here’s a simple implementation of a Database Connection Manager in Python:
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""
+
+import pyodbc
+
+class DatabaseConnectionManager:
+    def __init__(self):
+        self.connection = None
+
+    def connect(self, driver, server, database, username, password):
+        """Establish a connection to the database using ODBC."""
+        try:
+            connection_string = f'DRIVER={{{driver}}};SERVER={server};DATABASE={database};UID={username};PWD={password};'
+            self.connection = pyodbc.connect(connection_string)
+            print("Connection successful!")
+        except Exception as e:
+            print(f"Error connecting to database: {e}")
+
+    def execute_query(self, query):
+        """Execute a SQL query and return the results."""
+        if self.connection is None:
+            print("No connection established.")
+            return None
+        
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query)
+            if query.strip().upper().startswith("SELECT"):
+                return cursor.fetchall()
+            else:
+                self.connection.commit()
+                return cursor.rowcount
+        except Exception as e:
+            print(f"Error executing query: {e}")
+            return None
+
+    def close_connection(self):
+        """Close the database connection."""
+        if self.connection:
+            self.connection.close()
+            print("Connection closed.")
+
+# Example usage
+if __name__ == "__main__":
+    db_manager = DatabaseConnectionManager()
+    
+    # Replace with your database credentials
+    driver = "ODBC Driver 17 for SQL Server"  # Example for SQL Server
+    server = "your_server"
+    database = "your_database"
+    username = "your_username"
+    password = "your_password"
+
+    db_manager.connect(driver, server, database, username, password)
+
+    # Example query
+    select_query = "SELECT * FROM your_table"
+    results = db_manager.execute_query(select_query)
+    if results:
+        for row in results:
+            print(row)
+
+    # Close the connection
+    db_manager.close_connection()
+"""""""""""""""""""""""""""""""""""""""""""""""
+
+
+Explanation
+DatabaseConnectionManager Class: This class manages the database connection. It has methods to connect to the database, execute queries, and close the connection.
+
+connect Method: This method constructs the connection string using the provided parameters and attempts to establish a connection to the database.
+
+execute_query Method: This method executes a given SQL query. If the query is a SELECT statement, it fetches and returns the results. For other types of queries (like INSERT, UPDATE, DELETE), it commits the changes and returns the number of affected rows.
+
+close_connection Method: This method closes the database connection if it is open.
+
+Example Usage: The script includes an example of how to use the DatabaseConnectionManager class. You need to replace the placeholders with your actual database credentials.
+
+Notes
+Make sure to handle sensitive information like database credentials securely.
+You can extend this class to include more features, such as connection pooling, error logging, or support for different types of queries.
+Always ensure that you close the database connection to avoid resource leaks.

@@ -1,0 +1,94 @@
+Creating a simple query executor for running SQL queries on an ODBC-connected database can be accomplished using Python with the pyodbc library. Below is a step-by-step guide to building a basic command-line tool that allows users to connect to a database and execute SQL queries.
+
+
+Prerequisites
+1. Python: Ensure you have Python installed on your machine.
+
+2. pyodbc: Install the pyodbc library using pip:
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''
+pip install pyodbc
+'''''''''''''''''''''''''''''''''''''''''''''''''''
+
+3. ODBC Driver: Make sure you have the appropriate ODBC driver installed for your database (e.g., SQL Server, MySQL, PostgreSQL).
+
+Simple Query Executor Code
+Here’s a simple implementation of a query executor:
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''
+import pyodbc
+
+def connect_to_database(connection_string):
+    try:
+        connection = pyodbc.connect(connection_string)
+        print("Connection successful!")
+        return connection
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        return None
+
+def execute_query(connection, query):
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query)
+        
+        # If the query is a SELECT statement, fetch the results
+        if query.strip().lower().startswith("select"):
+            rows = cursor.fetchall()
+            for row in rows:
+                print(row)
+        else:
+            # For INSERT, UPDATE, DELETE, etc.
+            connection.commit()
+            print("Query executed successfully.")
+    except Exception as e:
+        print(f"Error executing query: {e}")
+
+def main():
+    # Example connection string for SQL Server
+    # Modify this according to your database
+    connection_string = (
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=your_server;"
+        "DATABASE=your_database;"
+        "UID=your_username;"
+        "PWD=your_password;"
+    )
+
+    connection = connect_to_database(connection_string)
+    
+    if connection:
+        while True:
+            query = input("Enter your SQL query (or 'exit' to quit): ")
+            if query.lower() == 'exit':
+                break
+            execute_query(connection, query)
+        
+        connection.close()
+
+if __name__ == "__main__":
+    main()
+'''''''''''''''''''''''''''''''''''''''''''''''''''
+
+How to Use the Tool
+1. Modify the Connection String: Update the connection_string variable in the main() function with your database details (server, database name, username, and password).
+
+2. Run the Script: Save the code to a file named query_executor.py and run it using:
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''
+python query_executor.py
+'''''''''''''''''''''''''''''''''''''''''''''''''''
+
+3. Enter SQL Queries: You can enter any SQL query when prompted. For example:
+
+To select data: SELECT * FROM your_table;
+To insert data: INSERT INTO your_table (column1, column2) VALUES (value1, value2);
+To update data: UPDATE your_table SET column1 = value1 WHERE condition;
+To delete data: DELETE FROM your_table WHERE condition;
+4. Exit the Tool: Type exit to close the tool.
+
+Notes
+Error Handling: The tool includes basic error handling for connection and query execution errors.
+Security: Be cautious with SQL injection if you plan to use user input directly in queries. Consider using parameterized queries for production applications.
+Database Compatibility: The connection string format may vary depending on the database you are connecting to. Adjust it accordingly.
+This simple query executor provides a foundation for running SQL queries against an ODBC-connected database and can be expanded with additional features as needed.

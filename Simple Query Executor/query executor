@@ -1,0 +1,52 @@
+import pyodbc
+
+def connect_to_database(connection_string):
+    try:
+        connection = pyodbc.connect(connection_string)
+        print("Connection successful!")
+        return connection
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        return None
+
+def execute_query(connection, query):
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query)
+        
+        # If the query is a SELECT statement, fetch the results
+        if query.strip().lower().startswith("select"):
+            rows = cursor.fetchall()
+            for row in rows:
+                print(row)
+        else:
+            # For INSERT, UPDATE, DELETE, etc.
+            connection.commit()
+            print("Query executed successfully.")
+    except Exception as e:
+        print(f"Error executing query: {e}")
+
+def main():
+    # Example connection string for SQL Server
+    # Modify this according to your database
+    connection_string = (
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=your_server;"
+        "DATABASE=your_database;"
+        "UID=your_username;"
+        "PWD=your_password;"
+    )
+
+    connection = connect_to_database(connection_string)
+    
+    if connection:
+        while True:
+            query = input("Enter your SQL query (or 'exit' to quit): ")
+            if query.lower() == 'exit':
+                break
+            execute_query(connection, query)
+        
+        connection.close()
+
+if __name__ == "__main__":
+    main()
